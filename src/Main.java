@@ -54,36 +54,54 @@ public class Main {
         System.out.println("O que você irá querer hoje? : ");
         int escolha = scanner.nextInt();
         scanner.nextLine();
+
+        String categoria;
         switch (escolha) {
             case 1:
-                for (int i = 0; i < sistema.restaurantes.length; i++) {
-                    if (sistema.restaurantes[i] != null && sistema.restaurantes[i].categoria.equals("Marmita")){
-                        System.out.println("- " + sistema.restaurantes[i].nome + " (" + sistema.restaurantes[i].tempoMedio + " min)");
-                    }
-                }
+                categoria = "Marmita";
                 break;
             case 2:
-                for (int i = 0; i < sistema.restaurantes.length; i++) {
-                    if (sistema.restaurantes[i] != null && sistema.restaurantes[i].categoria.equals("Pizza")){
-                        System.out.println("- " + sistema.restaurantes[i].nome + " (" + sistema.restaurantes[i].tempoMedio + " min)");
-                    }
-                }
+                categoria = "Pizza";
                 break;
             case 3:
-                for (int i = 0; i < sistema.restaurantes.length; i++) {
-                    if (sistema.restaurantes[i] != null && sistema.restaurantes[i].categoria.equals("Fast-Food")){
-                        System.out.println("- " + sistema.restaurantes[i].nome + " (" + sistema.restaurantes[i].tempoMedio + " min)");
-                    }
-                }
+                categoria = "Fast-Food";
                 break;
             case 4:
-                for (int i = 0; i < sistema.restaurantes.length; i++) {
-                    if (sistema.restaurantes[i] != null && sistema.restaurantes[i].categoria.equals("Doces")){
-                        System.out.println("- " + sistema.restaurantes[i].nome + " (" + sistema.restaurantes[i].tempoMedio + " min)");
-                    }
-                }
+                categoria = "Doces";
                 break;
+            default:
+                System.out.println("Opção inválida!");
+                return;
         }
+
+        boolean achou = false;
+        for (int i = 0; i < sistema.restaurantes.length; i++) {
+            if (sistema.restaurantes[i] != null && sistema.restaurantes[i].categoria.equals(categoria)) {
+                System.out.println("- " + sistema.restaurantes[i].nome + " (" + sistema.restaurantes[i].tempoMedio + " min)");
+                achou = true;
+            }
+        }
+
+        if (!achou) {
+            System.out.println("Nenhum restaurante nessa categoria.");
+            return;
+        }
+
+        System.out.print("\nDigite o nome do restaurante para ver o cardápio (ou Enter para voltar): ");
+        String nomeBusca = scanner.nextLine();
+
+        if (nomeBusca.isEmpty()) {
+            return;
+        }
+
+        int index = sistema.buscarIndicePorNome(nomeBusca);
+        if (index == -1 || !sistema.restaurantes[index].categoria.equals(categoria)) {
+            System.out.println("Restaurante não encontrado nessa categoria!");
+            return;
+        }
+
+        System.out.println("\n-- Cardápio: " + sistema.restaurantes[index].nome + " --");
+        sistema.restaurantes[index].mostrarCardapio();
     }
 
     static void cadastroRestaurante(SistemaRestaurantes sistema, Scanner scanner){
