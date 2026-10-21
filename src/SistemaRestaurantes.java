@@ -8,6 +8,14 @@ public class SistemaRestaurantes {
         restaurantes[2] = new Restaurantes("Cantinho da Marmita", "Marmita", 90);
         restaurantes[3] = new Restaurantes("The King Açaí", "Doces", 20);
         restaurantes[4] = new Restaurantes("Dominos Pizzaria", "Pizza", 120);
+
+        restaurantes[0].adicionarItem("Big Mac", "Dois hambúrgueres, queijo, alface e molho especial", 28.90);
+        restaurantes[0].adicionarItem("McFritas Grande", "Batata frita crocante", 14.50);
+        restaurantes[1].adicionarItem("Bob's Burger", "Hambúrguer com queijo e salada", 19.90);
+        restaurantes[1].adicionarItem("Milk Shake", "Shake de chocolate 400ml", 16.00);
+        restaurantes[2].adicionarItem("Marmita Executiva", "Arroz, feijão, bife e salada", 22.00);
+        restaurantes[3].adicionarItem("Açaí 500ml", "Açaí com banana e granola", 25.00);
+        restaurantes[4].adicionarItem("Pizza Calabresa G", "Calabresa, cebola e mussarela", 54.90);
     }
 
     public void listarTodos() {
