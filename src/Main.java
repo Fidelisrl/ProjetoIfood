@@ -8,6 +8,7 @@ public class Main {
         sistema.adicionarDados();
 
         Scanner scanner = new Scanner(System.in);
+        Sacola sacola = new Sacola();
 
         while (true) {
             System.out.println("\nPROJETO IFOOD");
@@ -16,6 +17,7 @@ public class Main {
             System.out.println("2 - Cadastro de Restaurante");
             System.out.println("3 - Editar Restaurante");
             System.out.println("4 - Deletar Restaurante");
+            System.out.println("5 - Sacola");
             System.out.println("0 - Sair");
             System.out.println("Digite o caminho desejado: ");
             int escolhaMenu = scanner.nextInt();
@@ -23,7 +25,7 @@ public class Main {
 
             switch (escolhaMenu){
                 case 1:
-                    menu(sistema, scanner);
+                    menu(sistema, scanner, sacola);
                     break;
                 case 2:
                     cadastroRestaurante(sistema, scanner);
@@ -33,6 +35,9 @@ public class Main {
                     break;
                 case 4:
                     deletarRestaurante(sistema, scanner);
+                    break;
+                case 5:
+                    verSacola(sacola, scanner);
                     break;
                 case 0:
                     System.out.println("Saindo do sistema...");
@@ -47,7 +52,7 @@ public class Main {
 
     }
 
-    static void menu(SistemaRestaurantes sistema, Scanner scanner) {
+    static void menu(SistemaRestaurantes sistema, Scanner scanner, Sacola sacola) {
         System.out.println("-- MENU --");
         System.out.println("- Categorias -");
         System.out.println("1 - Marmita \n2 - Pizza \n3 - Fast-Food \n4 - Doces");
@@ -102,6 +107,8 @@ public class Main {
 
         System.out.println("\n-- Cardápio: " + sistema.restaurantes[index].nome + " --");
         sistema.restaurantes[index].mostrarCardapio();
+
+        adicionarNaSacola(sistema.restaurantes[index], sacola, scanner);
     }
 
     static void cadastroRestaurante(SistemaRestaurantes sistema, Scanner scanner){
@@ -164,6 +171,70 @@ public class Main {
             System.out.println("Restaurante removido com sucesso!");
         } else {
             System.out.println("Restaurante não encontrado!");
+        }
+    }
+
+    static void adicionarNaSacola(Restaurantes restaurantes, Sacola sacola, Scanner scanner){
+        System.out.println("\nDigite o nome do item que deseja adicionar, ou enter para voltar: ");
+        String nomeItem = scanner.nextLine();
+
+        if(nomeItem.isEmpty()){
+            return;
+        }
+
+        ItemCardapio escolhido = null;
+
+        for(int i=0; i < restaurantes.cardapio.length; i++){
+            if(restaurantes.cardapio[i] != null && restaurantes.cardapio[i].nome.equalsIgnoreCase(nomeItem)){
+                escolhido = restaurantes.cardapio[i];
+                break;
+            }
+        }
+        if(escolhido == null){
+            System.out.println("Item não encontrado.");
+            return;
+        }
+        System.out.println("Quantidade: ");
+        int quantidade = scanner.nextInt();
+        scanner.nextLine();
+
+        if(quantidade <= 0){
+            System.out.println("Quantidade inválida.");
+            return;
+        }
+
+        sacola.adicionar(escolhido, quantidade);
+        System.out.println("Adicionado à sacola.");
+    }
+
+    static void alterarQuantidade(Sacola sacola, Scanner scanner){
+        System.out.println("Alterar Quantidade");
+        sacola.mostrarItem();
+
+        System.out.println("\nNome do item: ");
+        String nome = scanner.nextLine();
+
+        System.out.println("Nova quantidade (0 para remover): ");
+    }
+
+    static void verSacola(Sacola sacola, Scanner scanner){
+        System.out.println("\n= SACOLA =");
+        sacola.mostrarItem();
+        System.out.println("Escreva o nome do item para alterar sua quantidade, ou enter para voltar: ");
+        String nome = scanner.nextLine();
+
+        if(nome.isEmpty()){
+            return;
+        }
+
+        System.out.println("Nova quantidade (0 para remover): ");
+        int novaQuantidade = scanner.nextInt();
+        scanner.nextLine();
+
+        if(sacola.alterarQuantidade(nome, novaQuantidade)){
+            System.out.println("Sacola atualizada.");
+        } else {
+            System.out.println("Este item não foi adicionado à sacola.");
         }
     }
 }
