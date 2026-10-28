@@ -207,34 +207,71 @@ public class Main {
         System.out.println("Adicionado à sacola.");
     }
 
-    static void alterarQuantidade(Sacola sacola, Scanner scanner){
-        System.out.println("Alterar Quantidade");
-        sacola.mostrarItem();
-
-        System.out.println("\nNome do item: ");
-        String nome = scanner.nextLine();
-
-        System.out.println("Nova quantidade (0 para remover): ");
-    }
-
-    static void verSacola(Sacola sacola, Scanner scanner){
+    static void verSacola(Sacola sacola, Scanner scanner) {
         System.out.println("\n= SACOLA =");
-        sacola.mostrarItem();
-        System.out.println("Escreva o nome do item para alterar sua quantidade, ou enter para voltar: ");
-        String nome = scanner.nextLine();
 
-        if(nome.isEmpty()){
+        if (sacola.estaVazia()) {
+            System.out.println("A sua sacola está vazia.");
             return;
         }
 
-        System.out.println("Nova quantidade (0 para remover): ");
+        sacola.mostrarItem();
+
+        System.out.println("\n1 - Alterar quantidade de um item");
+        System.out.println("2 - Finalizar pedido");
+        System.out.println("0 - Voltar");
+        System.out.print("Escolha: ");
+        int opcao = scanner.nextInt();
+        scanner.nextLine();
+
+        switch (opcao) {
+            case 1:
+                alterarQuantidade(sacola, scanner);
+                break;
+            case 2:
+                finalizarPedido(sacola, scanner);
+                break;
+            case 0:
+                return;
+            default:
+                System.out.println("Opção inválida!");
+                break;
+        }
+    }
+
+    static void alterarQuantidade(Sacola sacola, Scanner scanner) {
+        System.out.print("\nNome do item: ");
+        String nome = scanner.nextLine();
+
+        System.out.print("Nova quantidade (0 para remover): ");
         int novaQuantidade = scanner.nextInt();
         scanner.nextLine();
 
-        if(sacola.alterarQuantidade(nome, novaQuantidade)){
+        if (sacola.alterarQuantidade(nome, novaQuantidade)) {
             System.out.println("Sacola atualizada.");
         } else {
             System.out.println("Este item não foi adicionado à sacola.");
         }
+    }
+
+    static void finalizarPedido(Sacola sacola, Scanner scanner) {
+        System.out.println("\n= FINALIZAR PEDIDO =");
+
+        System.out.println("-- Endereço de entrega --");
+        System.out.print("Rua: ");
+        String rua = scanner.nextLine();
+        System.out.print("Número: ");
+        String numero = scanner.nextLine();
+        System.out.print("Bairro: ");
+        String bairro = scanner.nextLine();
+        System.out.print("Complemento (Enter se não tiver): ");
+        String complemento = scanner.nextLine();
+
+        if (rua.isEmpty() || numero.isEmpty() || bairro.isEmpty()) {
+            System.out.println("Rua, número e bairro são obrigatórios. Pedido cancelado.");
+            return;
+        }
+
+        Endereco endereco = new Endereco(rua, numero, bairro, complemento);
     }
 }

@@ -39,6 +39,20 @@ public class Sacola {
         }
         return total;
     }
+    public boolean estaVazia() {
+        for (int i = 0; i < itens.length; i++) {
+            if (itens[i] != null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void limpar() {
+        for (int i = 0; i < itens.length; i++) {
+            itens[i] = null;
+        }
+    }
 
     public void mostrarItem() {
         boolean vazio = true;
