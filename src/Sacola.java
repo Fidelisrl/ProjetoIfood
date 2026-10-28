@@ -30,17 +30,30 @@ public class Sacola {
         }
         return false;
     }
+    public double calcularTotal() {
+        double total = 0;
+        for (int i = 0; i < itens.length; i++) {
+            if (itens[i] != null) {
+                total += itens[i].item.preco * itens[i].quantidade;
+            }
+        }
+        return total;
+    }
 
-    public void mostrarItem(){
+    public void mostrarItem() {
         boolean vazio = true;
-        for(int i=0; i < itens.length; i++){
-            if(itens[i] != null){
-                System.out.println("- " + itens[i].quantidade + "x " + itens[i].item.nome);
+        for (int i = 0; i < itens.length; i++) {
+            if (itens[i] != null) {
+                double subtotal = itens[i].item.preco * itens[i].quantidade;
+                System.out.printf("- %dx %s | R$ %.2f%n",
+                        itens[i].quantidade, itens[i].item.nome, subtotal);
                 vazio = false;
             }
         }
-        if(vazio){
+        if (vazio) {
             System.out.println("A sua sacola está vazia.");
+        } else {
+            System.out.printf("TOTAL: R$ %.2f%n", calcularTotal());
         }
     }
 }
