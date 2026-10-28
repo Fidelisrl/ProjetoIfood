@@ -273,5 +273,48 @@ public class Main {
         }
 
         Endereco endereco = new Endereco(rua, numero, bairro, complemento);
+
+        System.out.println("\n-- Forma de pagamento --");
+        System.out.println("1 - Dinheiro \n2 - Cartão \n3 - Pix");
+        System.out.print("Escolha: ");
+        int opcaoPagamento = scanner.nextInt();
+        scanner.nextLine();
+
+        String pagamento;
+        switch (opcaoPagamento) {
+            case 1:
+                pagamento = "Dinheiro";
+                break;
+            case 2:
+                pagamento = "Cartão";
+                break;
+            case 3:
+                pagamento = "Pix";
+                break;
+            default:
+                System.out.println("Forma de pagamento inválida. Pedido cancelado.");
+                return;
+        }
+
+        System.out.println("\n-- RESUMO DO PEDIDO --");
+        sacola.mostrarItem();
+        System.out.println("Endereço: " + endereco.rua + ", " + endereco.numero
+                + " - " + endereco.bairro);
+        if (!endereco.complemento.isEmpty()) {
+            System.out.println("Complemento: " + endereco.complemento);
+        }
+        System.out.println("Pagamento: " + pagamento);
+
+        System.out.print("\nConfirmar pedido? (S/N): ");
+        String confirmacao = scanner.nextLine();
+
+        if (confirmacao.equalsIgnoreCase("S")) {
+            sacola.limpar();
+            System.out.println("Pedido confirmado! Obrigado por pedir no iFood.");
+        } else {
+            System.out.println("Pedido cancelado. Sua sacola foi mantida.");
+        }
     }
+
+
 }
