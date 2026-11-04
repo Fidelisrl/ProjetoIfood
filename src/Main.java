@@ -7,54 +7,92 @@ public class Main {
         SistemaRestaurantes sistema = new SistemaRestaurantes();
         sistema.adicionarDados();
 
-        Scanner scanner = new Scanner(System.in);
-        Sacola sacola = new Sacola();
         SistemaPedidos pedidos = new SistemaPedidos();
 
-        while (true) {
-            System.out.println("\nPROJETO IFOOD");
+        SistemaUsuarios usuarios = new SistemaUsuarios();
+        usuarios.adicionarDados();
 
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            Usuario logado = telaLogin(usuarios, scanner);
+
+            if (logado == null) {
+                System.out.println("Saindo do sistema...");
+                scanner.close();
+                return;
+            }
+
+            if (logado.ehVendedor()) {
+                menuVendedor(sistema, scanner);
+            } else {
+                menuCliente(sistema, pedidos, scanner);
+            }
+        }
+    }
+
+    static void menuCliente(SistemaRestaurantes sistema, SistemaPedidos pedidos, Scanner scanner) {
+        Sacola sacola = new Sacola(); 
+
+        while (true) {
+            System.out.println("\nPROJETO IFOOD - CLIENTE");
             System.out.println("1 - MENU");
-            System.out.println("2 - Cadastro de Restaurante");
-            System.out.println("3 - Editar Restaurante");
-            System.out.println("4 - Deletar Restaurante");
-            System.out.println("5 - Sacola");
-            System.out.println("6 - Meus Pedidos");
-            System.out.println("0 - Sair");
-            System.out.println("Digite o caminho desejado: ");
-            int escolhaMenu = scanner.nextInt();
+            System.out.println("2 - Sacola");
+            System.out.println("3 - Meus Pedidos");
+            System.out.println("0 - Sair da conta");
+            System.out.print("Digite o caminho desejado: ");
+            int escolha = scanner.nextInt();
             scanner.nextLine();
 
-            switch (escolhaMenu) {
+            switch (escolha) {
                 case 1:
                     menu(sistema, scanner, sacola);
                     break;
                 case 2:
-                    cadastroRestaurante(sistema, scanner);
-                    break;
-                case 3:
-                    editarRestaurante(sistema, scanner);
-                    break;
-                case 4:
-                    deletarRestaurante(sistema, scanner);
-                    break;
-                case 5:
                     verSacola(sacola, pedidos, scanner);
                     break;
-                case 6:
+                case 3:
                     meusPedidos(pedidos, scanner);
                     break;
                 case 0:
-                    System.out.println("Saindo do sistema...");
-                    scanner.close();
+                    System.out.println("Saindo da conta...");
                     return;
                 default:
                     System.out.println("Opção inválida!");
                     break;
             }
         }
+    }
 
+    static void menuVendedor(SistemaRestaurantes sistema, Scanner scanner) {
+        while (true) {
+            System.out.println("\nPROJETO IFOOD - VENDEDOR");
+            System.out.println("1 - Cadastro de Restaurante");
+            System.out.println("2 - Editar Restaurante");
+            System.out.println("3 - Deletar Restaurante");
+            System.out.println("0 - Sair da conta");
+            System.out.print("Digite o caminho desejado: ");
+            int escolha = scanner.nextInt();
+            scanner.nextLine();
 
+            switch (escolha) {
+                case 1:
+                    cadastroRestaurante(sistema, scanner);
+                    break;
+                case 2:
+                    editarRestaurante(sistema, scanner);
+                    break;
+                case 3:
+                    deletarRestaurante(sistema, scanner);
+                    break;
+                case 0:
+                    System.out.println("Saindo da conta...");
+                    return;
+                default:
+                    System.out.println("Opção inválida!");
+                    break;
+            }
+        }
     }
 
     static void menu(SistemaRestaurantes sistema, Scanner scanner, Sacola sacola) {
