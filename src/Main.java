@@ -355,4 +355,26 @@ public class Main {
             }
         }
     }
+    static Usuario telaLogin(SistemaUsuarios usuarios, Scanner scanner) {
+        while (true) {
+            System.out.println("\n= LOGIN =");
+            System.out.print("Login (Enter para sair): ");
+            String login = scanner.nextLine();
+
+            if (login.isEmpty()) {
+                return null;
+            }
+
+            System.out.print("Senha: ");
+            String senha = scanner.nextLine();
+
+            Usuario usuario = usuarios.autenticar(login, senha);
+            if (usuario != null) {
+                System.out.println("Bem-vindo, " + usuario.login + "!");
+                return usuario;
+            }
+
+            System.out.println("Login ou senha incorretos.");
+        }
+    }
 }
