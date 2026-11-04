@@ -9,6 +9,7 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         Sacola sacola = new Sacola();
+        SistemaPedidos pedidos = new SistemaPedidos();
 
         while (true) {
             System.out.println("\nPROJETO IFOOD");
@@ -18,12 +19,13 @@ public class Main {
             System.out.println("3 - Editar Restaurante");
             System.out.println("4 - Deletar Restaurante");
             System.out.println("5 - Sacola");
+            System.out.println("6 - Meus Pedidos");
             System.out.println("0 - Sair");
             System.out.println("Digite o caminho desejado: ");
             int escolhaMenu = scanner.nextInt();
             scanner.nextLine();
 
-            switch (escolhaMenu){
+            switch (escolhaMenu) {
                 case 1:
                     menu(sistema, scanner, sacola);
                     break;
@@ -37,7 +39,10 @@ public class Main {
                     deletarRestaurante(sistema, scanner);
                     break;
                 case 5:
-                    verSacola(sacola, scanner);
+                    verSacola(sacola, pedidos, scanner);
+                    break;
+                case 6:
+                    meusPedidos(pedidos, scanner);
                     break;
                 case 0:
                     System.out.println("Saindo do sistema...");
@@ -111,7 +116,7 @@ public class Main {
         adicionarNaSacola(sistema.restaurantes[index], sacola, scanner);
     }
 
-    static void cadastroRestaurante(SistemaRestaurantes sistema, Scanner scanner){
+    static void cadastroRestaurante(SistemaRestaurantes sistema, Scanner scanner) {
         System.out.println("= CADASTRO DE RESTAURANTE =");
         System.out.println("Nome: ");
         String nome = scanner.nextLine();
@@ -174,23 +179,23 @@ public class Main {
         }
     }
 
-    static void adicionarNaSacola(Restaurantes restaurantes, Sacola sacola, Scanner scanner){
+    static void adicionarNaSacola(Restaurantes restaurantes, Sacola sacola, Scanner scanner) {
         System.out.println("\nDigite o nome do item que deseja adicionar, ou enter para voltar: ");
         String nomeItem = scanner.nextLine();
 
-        if(nomeItem.isEmpty()){
+        if (nomeItem.isEmpty()) {
             return;
         }
 
         ItemCardapio escolhido = null;
 
-        for(int i=0; i < restaurantes.cardapio.length; i++){
-            if(restaurantes.cardapio[i] != null && restaurantes.cardapio[i].nome.equalsIgnoreCase(nomeItem)){
+        for (int i = 0; i < restaurantes.cardapio.length; i++) {
+            if (restaurantes.cardapio[i] != null && restaurantes.cardapio[i].nome.equalsIgnoreCase(nomeItem)) {
                 escolhido = restaurantes.cardapio[i];
                 break;
             }
         }
-        if(escolhido == null){
+        if (escolhido == null) {
             System.out.println("Item não encontrado.");
             return;
         }
@@ -198,7 +203,7 @@ public class Main {
         int quantidade = scanner.nextInt();
         scanner.nextLine();
 
-        if(quantidade <= 0){
+        if (quantidade <= 0) {
             System.out.println("Quantidade inválida.");
             return;
         }
@@ -207,7 +212,7 @@ public class Main {
         System.out.println("Adicionado à sacola.");
     }
 
-    static void verSacola(Sacola sacola, Scanner scanner) {
+    static void verSacola(Sacola sacola, SistemaPedidos pedidos, Scanner scanner) {
         System.out.println("\n= SACOLA =");
 
         if (sacola.estaVazia()) {
@@ -229,7 +234,7 @@ public class Main {
                 alterarQuantidade(sacola, scanner);
                 break;
             case 2:
-                finalizarPedido(sacola, scanner);
+                finalizarPedido(sacola, pedidos, scanner);
                 break;
             case 0:
                 return;
@@ -254,7 +259,7 @@ public class Main {
         }
     }
 
-    static void finalizarPedido(Sacola sacola, Scanner scanner) {
+    static void finalizarPedido(Sacola sacola, SistemaPedidos pedidos, Scanner scanner) {
         System.out.println("\n= FINALIZAR PEDIDO =");
 
         System.out.println("-- Endereço de entrega --");
@@ -309,12 +314,45 @@ public class Main {
         String confirmacao = scanner.nextLine();
 
         if (confirmacao.equalsIgnoreCase("S")) {
+            Pedido pedido = new Pedido(pedidos.proximoNumero(), sacola, endereco, pagamento);
+            pedidos.adicionar(pedido);
             sacola.limpar();
-            System.out.println("Pedido confirmado! Obrigado por pedir no iFood.");
+            System.out.println("Pedido #" + pedido.numero + " confirmado! Obrigado por pedir no iFood.");
+
+            sacola.limpar();
         } else {
             System.out.println("Pedido cancelado. Sua sacola foi mantida.");
         }
     }
 
+    static void meusPedidos(SistemaPedidos pedidos, Scanner scanner) {
+        System.out.println("\n= MEUS PEDIDOS =");
+        pedidos.listar();
 
+        System.out.print("\nDigite o número de um pedido para ver detalhes (ou 0 para voltar): ");
+        int numero = scanner.nextInt();
+        scanner.nextLine();
+
+        if (numero == 0) {
+            return;
+        }
+
+        Pedido pedido = pedidos.buscarPorNumero(numero);
+        if (pedido == null) {
+            System.out.println("Pedido não encontrado!");
+            return;
+        }
+
+        pedido.mostrarDetalhes();
+
+        System.out.print("\nAvançar status do pedido? (S/N): ");
+        String resposta = scanner.nextLine();
+        if (resposta.equalsIgnoreCase("S")) {
+            if (pedido.avancarStatus()) {
+                System.out.println("Novo status: " + pedido.getStatus());
+            } else {
+                System.out.println("Esse pedido já foi entregue.");
+            }
+        }
+    }
 }
