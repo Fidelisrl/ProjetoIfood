@@ -32,7 +32,7 @@ public class Main {
     }
 
     static void menuCliente(SistemaRestaurantes sistema, SistemaPedidos pedidos, Scanner scanner) {
-        Sacola sacola = new Sacola(); 
+        Sacola sacola = new Sacola();
 
         while (true) {
             System.out.println("\nPROJETO IFOOD - CLIENTE");
