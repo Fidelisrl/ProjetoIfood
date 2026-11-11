@@ -156,3 +156,61 @@ public class ApiServer {
         }
         throw new IllegalArgumentException("Rota não existe: " + r);
     }
+    // ---------- JSON ----------
+    static String rj(Restaurantes x) {
+        return "{\"nome\":" + j(x.nome) + ",\"categoria\":" + j(x.categoria) + ",\"tempo\":" + x.tempoMedio + "}";
+    }
+
+    static String sj() {
+        StringBuilder sb = new StringBuilder("{\"itens\":[");
+        boolean first = true;
+        for (ItemSacola it : sacola.itens) {
+            if (it == null) continue;
+            if (!first) sb.append(",");
+            first = false;
+            sb.append("{\"nome\":" + j(it.item.nome) + ",\"quantidade\":" + it.quantidade + ",\"preco\":" + it.item.preco + "}");
+        }
+        return sb.append("],\"total\":" + sacola.calcularTotal() + "}").toString();
+    }
+
+    static String pj(Pedido p) {
+        StringBuilder sb = new StringBuilder("{\"numero\":" + p.numero + ",\"status\":" + j(p.getStatus()) + ",\"entregue\":" + (p.status == Pedido.STATUS.length - 1)
+                + ",\"total\":" + p.total + ",\"pagamento\":" + j(p.pagamento)
+                + ",\"endereco\":" + j(p.endereco.rua + ", " + p.endereco.numero + " - " + p.endereco.bairro) + ",\"itens\":[");
+        boolean first = true;
+        for (ItemSacola it : p.itens) {
+            if (it == null) continue;
+            if (!first) sb.append(",");
+            first = false;
+            sb.append(j(it.quantidade + "x " + it.item.nome));
+        }
+        return sb.append("]}").toString();
+    }
+
+    static String j(String s) {
+        if (s == null) s = "";
+        return "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ") + "\"";
+    }
+
+    static String f(String json, String key) {
+        Matcher m = Pattern.compile("\"" + key + "\"\\s*:\\s*(?:\"((?:\\\\.|[^\"\\\\])*)\"|(-?[\\d.]+))").matcher(json);
+        if (!m.find()) return "";
+        String v = m.group(1) != null ? m.group(1).replace("\\\"", "\"").replace("\\\\", "\\") : m.group(2);
+        return v.trim();
+    }
+
+    static String req(String json, String key) {
+        String v = f(json, key);
+        if (v.isEmpty()) throw new IllegalArgumentException("Campo obrigatório: " + key);
+        return v;
+    }
+
+    static String qp(HttpExchange ex, String key) throws IOException {
+        String q = ex.getRequestURI().getRawQuery();
+        if (q != null)
+            for (String p : q.split("&"))
+                if (p.startsWith(key + "="))
+                    return URLDecoder.decode(p.substring(key.length() + 1), StandardCharsets.UTF_8);
+        return "";
+    }
+}
