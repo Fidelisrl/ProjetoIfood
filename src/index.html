@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iFood - Projeto</title>
+<style>
+:root{--red:#ea1d2c;--ink:#3e3e3e;--mut:#717171;--bg:#f7f7f7;--card:#fff;--line:#e6e6e6}
+@media(prefers-color-scheme:dark){:root{--ink:#eee;--mut:#a0a0a0;--bg:#161616;--card:#222;--line:#383838}}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Nunito Sans","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--red);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.5px;flex:1}
+header button{background:transparent;color:#fff;border:1px solid #fff8;padding:6px 12px;border-radius:8px;cursor:pointer}
+nav{display:flex;gap:4px;background:var(--card);border-bottom:1px solid var(--line);padding:0 12px;overflow-x:auto}
+nav button{background:none;border:0;border-bottom:3px solid transparent;padding:14px 16px;font:inherit;font-weight:700;color:var(--mut);cursor:pointer}
+nav button.on{color:var(--red);border-color:var(--red)}
+main{max-width:820px;margin:0 auto;padding:20px}
+h2{margin:0 0 14px;font-size:20px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 16px;border-radius:99px;cursor:pointer;font:inherit}
+.chip.on{background:var(--red);color:#fff;border-color:var(--red)}
+.row{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.row .info{flex:1;min-width:180px}
+.row small{color:var(--mut);display:block;margin-top:2px}
+.price{font-weight:800}
+.link{cursor:pointer}
+button.p{background:var(--red);color:#fff;border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:700;cursor:pointer}
+button.s{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #ea1d2c66;outline-offset:1px}
+input,select{font:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);width:100%}
+input.q{width:64px}
+form{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+form .full{grid-column:1/-1}
+.total{font-size:20px;font-weight:800;text-align:right;margin:14px 0}
+.status{background:#ea1d2c1a;color:var(--red);padding:3px 10px;border-radius:99px;font-weight:700;font-size:13px}
+.login{max-width:340px;margin:12vh auto;background:var(--card);padding:28px;border-radius:16px;border:1px solid var(--line)}
+.login h1{color:var(--red);margin:0 0 4px;font-size:30px;letter-spacing:-1px}
+.login input{margin-top:10px}
+.err{color:var(--red);min-height:20px;margin:10px 0 0;font-size:14px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
+.empty{color:var(--mut);padding:30px 0;text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" role="status"></div>
+</body>
+</html>
