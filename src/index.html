@@ -46,5 +46,116 @@ form .full{grid-column:1/-1}
 <body>
 <div id="app"></div>
 <div id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const R=n=>'R$ '+Number(n).toFixed(2).replace('.',',');
+const CATS=['Todas','Marmita','Pizza','Fast-Food','Doces'];
+let user=null,tab='home',cat='Todas',rests=[],aberto=null,menu=[];
+
+const BASE=location.protocol==='file:'?'http://localhost:8080':'';
+async function api(p,m='GET',b){
+  let r;
+  try{r=await fetch(BASE+'/api'+p,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined})}
+  catch(e){throw new Error('Não consegui falar com o servidor. Rode "java ApiServer" e abra http://localhost:8080')}
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.erro||'Algo deu errado.');
+  return j;
+}
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200)}
+async function run(fn){try{await fn()}catch(e){toast(e.message)}}
+
+/* ---------- login ---------- */
+function loginView(){
+  $('#app').innerHTML=`<form class="login" onsubmit="doLogin(event);return false" style="display:block">
+    <h1>ifood</h1><div style="color:var(--mut)">Entre para pedir ou gerenciar restaurantes</div>
+    <input id="lg" placeholder="Login" autocomplete="username" autofocus>
+    <input id="sn" type="password" placeholder="Senha" autocomplete="current-password">
+    <div class="err" id="er"></div>
+    <button class="p" style="width:100%">Entrar</button>
+    <p style="color:var(--mut);font-size:13px">Teste: cliente / 1234 ou vendedor / 1234</p></form>`;
+}
+async function doLogin(e){
+  e.preventDefault();
+  try{user=await api('/login','POST',{login:$('#lg').value,senha:$('#sn').value});tab=user.vendedor?'rest':'home';shell()}
+  catch(x){$('#er').textContent=x.message}
+  return false;
+}
+function logout(){user=null;aberto=null;loginView()}
+
+/* ---------- estrutura ---------- */
+function shell(){
+  const tabs=user.vendedor?[['rest','Meus restaurantes']]:[['home','Restaurantes'],['sacola','Sacola'],['pedidos','Meus pedidos']];
+  $('#app').innerHTML=`<header><h1>ifood</h1><span>${esc(user.login)}</span><button onclick="logout()">Sair</button></header>
+  <nav>${tabs.map(t=>`<button class="${tab===t[0]?'on':''}" onclick="go('${t[0]}')">${t[1]}</button>`).join('')}</nav><main id="v"></main>`;
+  render();
+}
+function go(t){tab=t;aberto=null;shell()}
+function render(){({home:homeV,sacola:sacolaV,pedidos:pedidosV,rest:vendedorV})[tab]()}
+
+/* ---------- cliente ---------- */
+function homeV(){run(async()=>{
+  rests=await api('/restaurantes');
+  if(aberto!==null)return cardapioV();
+  const l=rests.filter(r=>cat==='Todas'||r.categoria===cat);
+  $('#v').innerHTML=`<h2>O que você quer pedir hoje?</h2>
+  <div class="chips">${CATS.map(c=>`<button class="chip ${c===cat?'on':''}" onclick="cat='${c}';homeV()">${c}</button>`).join('')}</div>`+
+  (l.length?l.map(r=>`<div class="row link" onclick="abrir('${esc(r.nome).replace(/'/g,"\\'")}')"><div class="info"><b>${esc(r.nome)}</b><small>${esc(r.categoria)} - ${r.tempo} min</small></div><span class="status">Ver cardápio</span></div>`).join(''):'<div class="empty">Nenhum restaurante nessa categoria.</div>');
+})}
+function abrir(n){run(async()=>{aberto=n;menu=await api('/cardapio?nome='+encodeURIComponent(n));cardapioV()})}
+function cardapioV(){
+  $('#v').innerHTML=`<button class="s" onclick="aberto=null;homeV()">Voltar</button><h2 style="margin-top:14px">${esc(aberto)}</h2>`+
+  (menu.length?menu.map((i,k)=>`<div class="row"><div class="info"><b>${esc(i.nome)}</b><small>${esc(i.descricao)}</small></div><span class="price">${R(i.preco)}</span>
+  <input class="q" id="q${k}" type="number" min="1" value="1" aria-label="Quantidade"><button class="p" onclick="add(${k})">Adicionar</button></div>`).join(''):'<div class="empty">Esse restaurante ainda não tem itens no cardápio.</div>');
+}
+function add(k){run(async()=>{await api('/sacola','POST',{restaurante:aberto,item:menu[k].nome,quantidade:$('#q'+k).value});toast('Adicionado à sacola')})}
+
+let sac={itens:[],total:0};
+function sacolaV(){run(async()=>{
+  sac=await api('/sacola');
+  if(!sac.itens.length){$('#v').innerHTML='<h2>Sacola</h2><div class="empty">A sua sacola está vazia. Escolha um restaurante para começar.</div>';return}
+  $('#v').innerHTML=`<h2>Sacola</h2>`+sac.itens.map((i,k)=>`<div class="row"><div class="info"><b>${esc(i.nome)}</b><small>${R(i.preco)} cada</small></div>
+  <input class="q" type="number" min="0" value="${i.quantidade}" aria-label="Quantidade de ${esc(i.nome)}" onchange="qtd(${k},this.value)"><span class="price">${R(i.preco*i.quantidade)}</span></div>`).join('')+
+  `<div class="total">Total: ${R(sac.total)}</div>
+  <h2>Entrega e pagamento</h2>
+  <form onsubmit="return pedir(event)">
+    <input id="rua" placeholder="Rua" class="full" required><input id="num" placeholder="Número" required><input id="bai" placeholder="Bairro" required>
+    <input id="com" placeholder="Complemento (opcional)" class="full">
+    <select id="pg" class="full"><option>Dinheiro</option><option>Cartão</option><option>Pix</option></select>
+    <button class="p full">Finalizar pedido</button></form>`;
+})}
+function qtd(k,v){run(async()=>{await api('/sacola','PUT',{item:sac.itens[k].nome,quantidade:v});sacolaV()})}
+function pedir(e){e.preventDefault();run(async()=>{
+  const p=await api('/pedidos','POST',{rua:$('#rua').value,numero:$('#num').value,bairro:$('#bai').value,complemento:$('#com').value,pagamento:$('#pg').value});
+  toast('Pedido #'+p.numero+' confirmado!');go('pedidos')});return false}
+
+function pedidosV(){run(async()=>{
+  const l=await api('/pedidos');
+  $('#v').innerHTML='<h2>Meus pedidos</h2>'+(l.length?l.map(p=>`<div class="row"><div class="info"><b>Pedido #${p.numero}</b> <span class="status">${esc(p.status)}</span>
+  <small>${p.itens.map(esc).join(', ')}</small><small>${esc(p.endereco)} - ${esc(p.pagamento)}</small></div><span class="price">${R(p.total)}</span>
+  ${p.entregue?'':`<button class="s" onclick="avancar(${p.numero})">Avançar status</button>`}</div>`).join(''):'<div class="empty">Você ainda não fez nenhum pedido.</div>');
+})}
+function avancar(n){run(async()=>{await api('/pedidos/avancar','POST',{numero:n});pedidosV()})}
+
+/* ---------- vendedor ---------- */
+function vendedorV(){run(async()=>{
+  rests=await api('/restaurantes');
+  $('#v').innerHTML=`<h2>Novo restaurante</h2>
+  <form onsubmit="return criar(event)"><input id="rn" placeholder="Nome" required>
+  <select id="rc">${CATS.slice(1).map(c=>`<option>${c}</option>`).join('')}</select>
+  <input id="rt" type="number" min="1" placeholder="Tempo médio de entrega (min)" required><button class="p">Cadastrar restaurante</button></form>
+  <h2 style="margin-top:28px">Restaurantes cadastrados</h2>`+
+  (rests.length?rests.map((r,k)=>`<div class="row"><div class="info"><b>${esc(r.nome)}</b><small>${esc(r.categoria)} - ${r.tempo} min</small></div>
+  <button class="s" onclick="item(${k})">Novo item</button><button class="s" onclick="editar(${k})">Editar</button><button class="s" onclick="del(${k})">Excluir</button></div>`).join(''):'<div class="empty">Nenhum restaurante cadastrado.</div>');
+})}
+function criar(e){e.preventDefault();run(async()=>{await api('/restaurantes','POST',{nome:$('#rn').value,categoria:$('#rc').value,tempo:$('#rt').value});toast('Restaurante adicionado');vendedorV()});return false}
+function editar(k){const r=rests[k],n=prompt('Novo nome',r.nome);if(n===null)return;const c=prompt('Nova categoria',r.categoria);if(c===null)return;const t=prompt('Novo tempo médio (min)',r.tempo);if(t===null)return;
+  run(async()=>{await api('/restaurantes?nome='+encodeURIComponent(r.nome),'PUT',{nome:n,categoria:c,tempo:t});toast('Restaurante atualizado');vendedorV()})}
+function del(k){if(!confirm('Excluir '+rests[k].nome+'?'))return;run(async()=>{await api('/restaurantes?nome='+encodeURIComponent(rests[k].nome),'DELETE');toast('Restaurante removido');vendedorV()})}
+function item(k){const n=prompt('Nome do item');if(!n)return;const d=prompt('Descrição')||'';const p=prompt('Preço (ex: 19.90)');if(!p)return;
+  run(async()=>{await api('/cardapio','POST',{restaurante:rests[k].nome,nome:n,descricao:d,preco:p.replace(',','.')});toast('Item adicionado')})}
+
+loginView();
+</script>
 </body>
 </html>

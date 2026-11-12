@@ -32,14 +32,6 @@ public class ApiServer {
             ex.close();
             return;
         }
-        ex.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-        ex.getResponseHeaders().set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-        ex.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");
-        if (m.equals("OPTIONS")) {
-            ex.sendResponseHeaders(204, -1);
-            ex.close();
-            return;
-        }
         int code = 200;
         String out;
         String ctype = "application/json; charset=utf-8";
@@ -156,6 +148,7 @@ public class ApiServer {
         }
         throw new IllegalArgumentException("Rota não existe: " + r);
     }
+
     // ---------- JSON ----------
     static String rj(Restaurantes x) {
         return "{\"nome\":" + j(x.nome) + ",\"categoria\":" + j(x.categoria) + ",\"tempo\":" + x.tempoMedio + "}";
